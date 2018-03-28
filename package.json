@@ -4,6 +4,7 @@
   "description": "Timer with notifications with randomized names",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"I don't care yet\" && exit 1"
   },
   "author": "",
