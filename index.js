@@ -1,7 +1,8 @@
 const nn = require('node-notifier')
 const commandLineArgs = require('command-line-args')
 
-const optionDefinitions = [{
+const optionDefinitions = [
+  {
     name: 'names',
     alias: 'n',
     type: String,
@@ -42,16 +43,19 @@ const showReminder = (timeLeft, next) => {
 }
 
 const showChange = (names, index) => {
-  nn.notify({
-    title: options.title,
-    message: `Time's up. Next in line ${getNext(names, index)}`,
-    timeout: 60,
-    actions: 'OK'
-  }, (error, response, metadata) => {
-    console.log(response, metadata);
-    const newIndex = (names[index + 1] && index + 1) || 0
-    setTimer(names, index + 1)
-  })
+  nn.notify(
+    {
+      title: options.title,
+      message: `Time's up. Next in line ${getNext(names, index)}`,
+      timeout: 60,
+      actions: 'OK'
+    },
+    (error, response, metadata) => {
+      console.log(response, metadata)
+      const newIndex = (names[index + 1] && index + 1) || 0
+      setTimer(names, newIndex)
+    }
+  )
 }
 
 const setTimer = (names, index) => {
@@ -67,18 +71,21 @@ const setTimer = (names, index) => {
 const main = () => {
   const names = options.names
   if (options.random) {
-    names.sort(() => .5 - Math.random())
+    names.sort(() => 0.5 - Math.random())
   }
   console.log('Started')
-  nn.notify({
-    title: options.title,
-    message: `${names[0]}. Ready to start?`,
-    actions: 'Start',
-    timeout: 60
-  }, (error, response, metadata) => {
-    console.log(response, metadata)
-    setTimer(names, 1)
-  })
+  nn.notify(
+    {
+      title: options.title,
+      message: `${names[0]}. Ready to start?`,
+      actions: 'Start',
+      timeout: 60
+    },
+    (error, response, metadata) => {
+      console.log(response, metadata)
+      setTimer(names, 1)
+    }
+  )
 }
 
 main()
