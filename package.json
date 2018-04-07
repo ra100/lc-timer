@@ -10,7 +10,9 @@
   "author": "",
   "license": "WTFPL",
   "dependencies": {
+    "cli-progress": "^1.8.0",
+    "colors": "^1.2.1",
     "command-line-args": "^5.0.2",
-    "node-notifier": "^5.2.1"
+    "inquirer": "^5.2.0"
   }
 }

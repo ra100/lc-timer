@@ -1,5 +1,7 @@
-const nn = require('node-notifier')
+const inquirer = require('inquirer')
 const commandLineArgs = require('command-line-args')
+const cliProgress = require('cli-progress')
+const colors = require('colors/safe')
 
 const optionDefinitions = [
   {
@@ -32,7 +34,9 @@ const optionDefinitions = [
 
 const options = commandLineArgs(optionDefinitions)
 
-const getNext = (names, index) => names[index + 1] || names[0]
+const nextIndex = (names, index) => index + 1 < names.length ? index + 1 : 0
+
+const getNext = (names, index) => names[next(names, index)]
 
 const shuffleArray = array => {
   for (let i = array.length - 1; i > 0; i--) {
@@ -41,39 +45,46 @@ const shuffleArray = array => {
   }
 }
 
-const showReminder = (timeLeft, next) => {
-  nn.notify({
-    title: options.title,
-    message: `Time left: ${timeLeft}s, next turn: ${next}`,
-    timeout: 5
-  })
+const timesUp = (interval) => (...conf) => () => {
+  clearInterval(interval)
+  start(...conf)
 }
 
-const showChange = (names, index) => {
-  nn.notify(
-    {
-      title: options.title,
-      message: `Time's up. Next in line ${getNext(names, index)}`,
-      timeout: 900,
-      actions: 'OK'
-    },
-    (error, response, metadata) => {
-      if (metadata.activationValue === 'OK') {
-        const newIndex = (names[index + 1] && index + 1) || 0
-        setTimer(names, newIndex)
-      }
+const countdown = (names, index) => {
+  const timestampStart = Date.now()
+  const timestampEnd = timestampStart + (options.interval * 60 * 1000)
+  const progressBar = new cliProgress.Bar({
+      format: `${colors.yellow.bold(names[index])} [{bar}] {percentage}% | {value}/{total}s`,
+      barCompleteChar: '\u2588',
+      barIncompleteChar: '\u2591'
+  }, cliProgress.Presets.shades_grey);
+  const totalSeconds = Math.floor((timestampEnd - timestampStart) / 1000)
+  progressBar.start(totalSeconds, 0)
+
+  const interval = setInterval(() => {
+    const secondsRemaining = Math.floor((timestampEnd - Date.now()) / 1000)
+    progressBar.update(totalSeconds - secondsRemaining)
+    if (secondsRemaining <= 0) {
+      progressBar.stop()
+      return timesUp(interval)(names, nextIndex(names, index))()
     }
-  )
+  }, 100)
 }
 
-const setTimer = (names, index) => {
-  const interval = options.interval
-  setTimeout(() => {
-    showReminder(60, getNext(names, index))
-  }, 60 * (interval - 1) * 1000)
-  setTimeout(() => {
-    showChange(names, index)
-  }, 60 * 1000)
+const start = (names = [], index = 0) => {
+  console.log(`Next to go: ${colors.bold.cyan(names[index])}`)
+  inquirer.prompt([{
+    type: 'confirm',
+    name: 'ready',
+    message: 'Ready to start?',
+    default: true
+  }]).then(answers => {
+    if (!answers.ready) {
+      console.log('Nothing to do here.')
+      process.exit(0)
+    }
+    countdown(names, index)
+  });
 }
 
 const main = () => {
@@ -81,20 +92,8 @@ const main = () => {
   if (options.random) {
     shuffleArray(names)
   }
-  console.log('Started')
-  nn.notify(
-    {
-      title: options.title,
-      message: `${names[0]}. Ready to start?`,
-      actions: 'Start',
-      timeout: 900
-    },
-    (error, response, metadata) => {
-      if (metadata.activationValue === 'Start') {
-        setTimer(names, 1)
-      }
-    }
-  )
+  console.log(`Order: ${colors.bold(names.join(', '))}`)
+  start(names)
 }
 
 main()
