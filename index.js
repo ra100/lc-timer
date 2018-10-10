@@ -31,17 +31,28 @@ const optionDefinitions = [{
     alias: 't',
     type: String,
     defaultValue: 'Lightning Coding'
+  },
+  {
+    name: 'voice',
+    alias: 'v',
+    type: String,
+    defaultValue: null
   }
 ]
 
-const say = (text, config) => {
-  if (config) {
-    spawn('say', [config, text])
-  }
-  spawn('say', [text])
-}
-
 const options = commandLineArgs(optionDefinitions)
+
+const say = (text, config) => {
+  var params = []
+  if (options.voice) {
+    params.push("-v", options.voice)
+  }
+  if (config) {
+    params.push(config)
+  }
+  params.push(text)
+  spawn('say', params)
+}
 
 const nextIndex = (names, index) => index + 1 < names.length ? index + 1 : 0
 
