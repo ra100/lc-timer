@@ -1,10 +1,9 @@
-const {
-  spawn, exec
-} = require('child_process');
-const inquirer = require('inquirer')
-const commandLineArgs = require('command-line-args')
-const cliProgress = require('cli-progress')
-const colors = require('colors/safe')
+const { spawn, exec } = require('child_process');
+const inquirer        = require('inquirer');
+const commandLineArgs = require('command-line-args');
+const cliProgress     = require('cli-progress');
+const colors          = require('colors/safe');
+const io              = require('fs');
 
 const optionDefinitions = [{
     name: 'names',
@@ -37,11 +36,66 @@ const optionDefinitions = [{
     alias: 'v',
     type: String,
     defaultValue: null
+  },
+  {
+    name: 'thresholds',
+    alias: 'l',
+    type: String,
+    defaultValue: null
   }
 ]
 
 const options = commandLineArgs(optionDefinitions)
 
+let thresholds = [{
+    threshold: 120,
+    text: 'Two minutes remaining'
+  },
+  {
+    threshold: 60,
+    text: '60 seconds remaining'
+  },
+  {
+    threshold: 1,
+    text: 'Your suffering is over'
+  },
+  {
+    threshold: 10,
+    text: 'ten'
+  },
+  {
+    threshold: 5,
+    text: 'five'
+  },
+  {
+    threshold: 4,
+    text: 'four'
+  },
+  {
+    threshold: 3,
+    text: 'three'
+  },
+  {
+    threshold: 2,
+    text: 'two'
+  }
+]
+
+if (options.thresholds) {
+  let data, parsed;
+  try {
+    result = io.readFileSync(options.thresholds, 'UTF-8');
+    parsed = JSON.parse(result);
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+  if (!parsed.thresholds) {
+    console.log('Bad input "thresholds" file format');
+    process.exit(1);
+  }
+  thresholds = parsed.thresholds;
+}
 
 /** Promisified wraper for exec */
 function _exec(cmd) {
@@ -68,6 +122,10 @@ const say = async (text, config) => {
             console.log(err);
             process.exit(1);
           });
+        if (!result) {
+          console.log('The "say" voices list is empty');
+          process.exit(1);
+        }
         const voicesList = result.split(/\n/g);
         voice = voicesList[parseInt(Math.random() * (voicesList.length - 2))];
       }
@@ -97,44 +155,10 @@ const timesUp = (interval) => (...conf) => () => {
   start(...conf)
 }
 
-const thresholds = [{
-    threshold: 120,
-    action: () => say('Two minutes remaining')
-  },
-  {
-    threshold: 60,
-    action: () => say('60 seconds remaining')
-  },
-  {
-    threshold: 1,
-    action: () => say('Your suffering is over')
-  },
-  {
-    threshold: 10,
-    action: () => say('ten')
-  },
-  {
-    threshold: 5,
-    action: () => say('five')
-  },
-  {
-    threshold: 4,
-    action: () => say('four')
-  },
-  {
-    threshold: 3,
-    action: () => say('three')
-  },
-  {
-    threshold: 2,
-    action: () => say('two')
-  }
-]
-
 const checkThreshold = (thresholdProgress, secondsRemaining) => {
   thresholds.forEach((th, index) => {
     if (!thresholdProgress[index] && th.threshold >= secondsRemaining) {
-      th.action()
+      say(th.text)
       thresholdProgress[index] = true
     }
   })
