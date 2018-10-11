@@ -1,5 +1,5 @@
 const {
-  spawn
+  spawn, exec
 } = require('child_process');
 const inquirer = require('inquirer')
 const commandLineArgs = require('command-line-args')
@@ -42,10 +42,37 @@ const optionDefinitions = [{
 
 const options = commandLineArgs(optionDefinitions)
 
-const say = (text, config) => {
-  var params = []
+
+/** Promisified wraper for exec */
+function _exec(cmd) {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (err,stdout) => {
+      if (err)
+        return reject(err);
+      resolve(stdout);
+    });
+  });
+}
+
+let voice; // Chosen voice
+
+const say = async (text, config) => {
+  const params = []
   if (options.voice) {
-    params.push("-v", options.voice)
+    if (!voice) {
+      if (options.voice.toLowerCase() !== 'random') {
+        voice = options.voice;
+      } else {
+        const result = await _exec('say -v ? | awk \'{ print $1 }\'')
+          .catch((err) => {
+            console.log(err);
+            process.exit(1);
+          });
+        const voicesList = result.split(/\n/g);
+        voice = voicesList[parseInt(Math.random() * (voicesList.length - 2))];
+      }
+    }
+    params.push("-v", voice);
   }
   if (config) {
     params.push(config)
