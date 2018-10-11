@@ -1,0 +1,35 @@
+{
+  "thresholds": [{
+      "threshold": 120,
+      "text": "Two minutes remaining"
+    },
+    {
+      "threshold": 60,
+      "text": "60 seconds remaining"
+    },
+    {
+      "threshold": 1,
+      "text": "Your suffering is over"
+    },
+    {
+      "threshold": 10,
+      "text": "ten"
+    },
+    {
+      "threshold": 5,
+      "text": "five"
+    },
+    {
+      "threshold": 4,
+      "text": "four"
+    },
+    {
+      "threshold": 3,
+      "text": "three"
+    },
+    {
+      "threshold": 2,
+      "text": "two"
+    }
+  ]
+}
