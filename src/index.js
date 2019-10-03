@@ -1,9 +1,11 @@
-const {spawn, exec} = require('child_process')
+const {spawn} = require('child_process')
 const inquirer = require('inquirer')
 const commandLineArgs = require('command-line-args')
 const cliProgress = require('cli-progress')
 const colors = require('colors/safe')
 const io = require('fs')
+
+const {_exec} = require('./util')
 
 const optionDefinitions = [
   {
@@ -97,16 +99,6 @@ if (options.thresholds) {
     process.exit(1)
   }
   thresholds = parsed.thresholds
-}
-
-/** Promisified wraper for exec */
-function _exec(cmd) {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (err, stdout) => {
-      if (err) return reject(err)
-      resolve(stdout)
-    })
-  })
 }
 
 let voice // Chosen voice
