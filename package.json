@@ -14,5 +14,8 @@
     "colors": "^1.4.0",
     "command-line-args": "^5.1.1",
     "inquirer": "^7.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.1"
   }
 }
