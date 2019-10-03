@@ -5,7 +5,7 @@ const cliProgress = require('cli-progress')
 const colors = require('colors/safe')
 const io = require('fs')
 
-const {_exec} = require('./util')
+const {_exec, shuffleArray} = require('./util')
 
 const optionDefinitions = [
   {
@@ -134,13 +134,6 @@ const say = async (text, config) => {
 }
 
 const nextIndex = (names, index) => (index + 1 < names.length ? index + 1 : 0)
-
-const shuffleArray = array => {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
-}
 
 const timesUp = interval => (...conf) => () => {
   clearInterval(interval)
