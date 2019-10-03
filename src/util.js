@@ -10,6 +10,8 @@ function _exec(cmd) {
   })
 }
 
+const nextIndex = (names, index) => (index + 1 < names.length ? index + 1 : 0)
+
 const shuffleArray = array => {
   for (let i = array.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1))
@@ -19,5 +21,6 @@ const shuffleArray = array => {
 
 module.exports = {
     _exec,
-    shuffleArray
+    shuffleArray,
+    nextIndex
 }
