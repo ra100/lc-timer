@@ -1,136 +1,138 @@
-const { spawn, exec } = require('child_process');
-const inquirer        = require('inquirer');
-const commandLineArgs = require('command-line-args');
-const cliProgress     = require('cli-progress');
-const colors          = require('colors/safe');
-const io              = require('fs');
+const {spawn, exec} = require('child_process')
+const inquirer = require('inquirer')
+const commandLineArgs = require('command-line-args')
+const cliProgress = require('cli-progress')
+const colors = require('colors/safe')
+const io = require('fs')
 
-const optionDefinitions = [{
+const optionDefinitions = [
+  {
     name: 'names',
     alias: 'n',
     type: String,
     multiple: true,
     defaultOption: true,
-    defaultValue: ['me']
+    defaultValue: ['me'],
   },
   {
     name: 'interval',
     alias: 'i',
     type: Number,
-    defaultValue: 6 // minutes
+    defaultValue: 6, // minutes
   },
   {
     name: 'random',
     alias: 'r',
     type: Boolean,
-    defaultValue: false
+    defaultValue: false,
   },
   {
     name: 'title',
     alias: 't',
     type: String,
-    defaultValue: 'Lightning Coding'
+    defaultValue: 'Lightning Coding',
   },
   {
     name: 'voice',
     alias: 'v',
     type: String,
-    defaultValue: null
+    defaultValue: null,
   },
   {
     name: 'thresholds',
     alias: 'l',
     type: String,
-    defaultValue: null
-  }
+    defaultValue: null,
+  },
 ]
 
 const options = commandLineArgs(optionDefinitions)
 
-let thresholds = [{
+let thresholds = [
+  {
     threshold: 120,
-    text: 'Two minutes remaining'
+    text: 'Two minutes remaining',
   },
   {
     threshold: 60,
-    text: '60 seconds remaining'
+    text: '60 seconds remaining',
   },
   {
     threshold: 1,
-    text: 'Your suffering is over'
+    text: 'Your suffering is over',
   },
   {
     threshold: 10,
-    text: 'ten'
+    text: 'ten',
   },
   {
     threshold: 5,
-    text: 'five'
+    text: 'five',
   },
   {
     threshold: 4,
-    text: 'four'
+    text: 'four',
   },
   {
     threshold: 3,
-    text: 'three'
+    text: 'three',
   },
   {
     threshold: 2,
-    text: 'two'
-  }
+    text: 'two',
+  },
 ]
 
 if (options.thresholds) {
-  let data, parsed;
+  let data, parsed
   try {
-    result = io.readFileSync(options.thresholds, 'UTF-8');
-    parsed = JSON.parse(result);
+    result = io.readFileSync(options.thresholds, 'UTF-8')
+    parsed = JSON.parse(result)
   } catch (err) {
-    console.log(err);
-    process.exit(1);
+    console.log(err)
+    process.exit(1)
   }
   if (!parsed.thresholds) {
-    console.log('Bad input "thresholds" file format');
-    process.exit(1);
+    console.log('Bad input "thresholds" file format')
+    process.exit(1)
   }
-  thresholds = parsed.thresholds;
+  thresholds = parsed.thresholds
 }
 
 /** Promisified wraper for exec */
 function _exec(cmd) {
   return new Promise((resolve, reject) => {
-    exec(cmd, (err,stdout) => {
-      if (err)
-        return reject(err);
-      resolve(stdout);
-    });
-  });
+    exec(cmd, (err, stdout) => {
+      if (err) return reject(err)
+      resolve(stdout)
+    })
+  })
 }
 
-let voice; // Chosen voice
+let voice // Chosen voice
 
 const say = async (text, config) => {
   const params = []
   if (options.voice) {
     if (!voice) {
       if (options.voice.toLowerCase() !== 'random') {
-        voice = options.voice;
+        voice = options.voice
       } else {
-        const result = await _exec('say -v ? | awk \'{ print $1 }\'')
-          .catch((err) => {
-            console.log(err);
-            process.exit(1);
-          });
+        const result = await _exec("say -v ? | awk '{ print $1 }'").catch(
+          err => {
+            console.log(err)
+            process.exit(1)
+          }
+        )
         if (!result) {
-          console.log('The "say" voices list is empty');
-          process.exit(1);
+          console.log('The "say" voices list is empty')
+          process.exit(1)
         }
-        const voicesList = result.split(/\n/g);
-        voice = voicesList[parseInt(Math.random() * (voicesList.length - 2))];
+        const voicesList = result.split(/\n/g)
+        voice = voicesList[parseInt(Math.random() * (voicesList.length - 2))]
       }
     }
-    params.push("-v", voice);
+    params.push('-v', voice)
   }
   if (config) {
     params.push(config)
@@ -139,18 +141,18 @@ const say = async (text, config) => {
   spawn('say', params)
 }
 
-const nextIndex = (names, index) => index + 1 < names.length ? index + 1 : 0
+const nextIndex = (names, index) => (index + 1 < names.length ? index + 1 : 0)
 
 const getNext = (names, index) => names[next(names, index)]
 
 const shuffleArray = array => {
   for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    let j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
   }
 }
 
-const timesUp = (interval) => (...conf) => () => {
+const timesUp = interval => (...conf) => () => {
   clearInterval(interval)
   start(...conf)
 }
@@ -168,12 +170,17 @@ const checkThreshold = (thresholdProgress, secondsRemaining) => {
 const countdown = (names, index) => {
   say('Show me what you got!')
   const timestampStart = Date.now()
-  const timestampEnd = timestampStart + (options.interval * 60 * 1000)
-  const progressBar = new cliProgress.Bar({
-    format: `${colors.yellow.bold(names[index])} [{bar}] {percentage}% | {value}/{total}s`,
-    barCompleteChar: '\u2588',
-    barIncompleteChar: '\u2591'
-  }, cliProgress.Presets.shades_grey);
+  const timestampEnd = timestampStart + options.interval * 60 * 1000
+  const progressBar = new cliProgress.Bar(
+    {
+      format: `${colors.yellow.bold(
+        names[index]
+      )} [{bar}] {percentage}% | {value}/{total}s`,
+      barCompleteChar: '\u2588',
+      barIncompleteChar: '\u2591',
+    },
+    cliProgress.Presets.shades_grey
+  )
   const totalSeconds = Math.floor((timestampEnd - timestampStart) / 1000)
   progressBar.start(totalSeconds, 0)
 
@@ -193,19 +200,23 @@ const countdown = (names, index) => {
 const start = (names = [], index = 0) => {
   console.log(`Next to go: ${colors.bold.cyan(names[index])}`)
   say(`Are you ready? ${names[index]}`)
-  inquirer.prompt([{
-    type: 'confirm',
-    name: 'ready',
-    message: 'Ready to start?',
-    default: true
-  }]).then(answers => {
-    if (!answers.ready) {
-      console.log('Nothing to do here.')
-      say('I will remember this!!!')
-      process.exit(0)
-    }
-    countdown(names, index)
-  });
+  inquirer
+    .prompt([
+      {
+        type: 'confirm',
+        name: 'ready',
+        message: 'Ready to start?',
+        default: true,
+      },
+    ])
+    .then(answers => {
+      if (!answers.ready) {
+        console.log('Nothing to do here.')
+        say('I will remember this!!!')
+        process.exit(0)
+      }
+      countdown(names, index)
+    })
 }
 
 const main = () => {
