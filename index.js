@@ -5,6 +5,8 @@ const cliProgress = require('cli-progress')
 const colors = require('colors/safe')
 const io = require('fs')
 
+
+
 const optionDefinitions = [
   {
     name: 'names',
@@ -195,6 +197,22 @@ const countdown = (names, index) => {
       return timesUp(interval)(names, nextIndex(names, index))()
     }
   }, 100)
+
+  const stdin = process.openStdin();
+  stdin.setRawMode(true);
+  stdin.on('keypress', keypressListener);
+
+  function keypressListener (chunk, key) {
+
+    if(key.name === 's'){
+      progressBar.stop()
+      timesUp(interval)(names, nextIndex(names, index))()
+      stdin.removeListener('keypress',keypressListener)
+    }
+    
+    if (key && key.ctrl && key.name == 'c') process.exit();
+  }
+
 }
 
 const start = (names = [], index = 0) => {
