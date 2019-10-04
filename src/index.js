@@ -6,7 +6,6 @@ const colors = require('colors/safe')
 const {_exec, shuffleArray, nextIndex} = require('./util')
 const options = require('./options')
 const thresholds = require('./thresholds')
-const keypress = require('./keypress')
 
 let voice // Chosen voice
 
@@ -84,11 +83,6 @@ const countdown = (names, index) => {
     }
   }, 100)
 
-  keypress('s', () => {
-    progressBar.stop()
-    timesUp(interval)(names, nextIndex(names, index))()
-  })
-  
 }
 
 const start = (names = [], index = 0) => {
@@ -97,17 +91,20 @@ const start = (names = [], index = 0) => {
   inquirer
     .prompt([
       {
-        type: 'confirm',
+        type: 'list',
         name: 'ready',
         message: 'Ready to start?',
-        default: true,
+        choices: ['Yes','No','Skip']
       },
     ])
     .then(answers => {
-      if (!answers.ready) {
+      const ready = answers.ready.toLowerCase()
+      if(ready === 'no') {
         console.log('Nothing to do here.')
         say('I will remember this!!!')
         process.exit(0)
+      }else if(ready === 'skip') {
+        return start(names, index+1)
       }
       countdown(names, index)
     })
