@@ -1,113 +1,11 @@
-const {spawn, exec} = require('child_process')
+const {spawn} = require('child_process')
 const inquirer = require('inquirer')
-const commandLineArgs = require('command-line-args')
 const cliProgress = require('cli-progress')
 const colors = require('colors/safe')
-const io = require('fs')
 
-const optionDefinitions = [
-  {
-    name: 'names',
-    alias: 'n',
-    type: String,
-    multiple: true,
-    defaultOption: true,
-    defaultValue: ['me'],
-  },
-  {
-    name: 'interval',
-    alias: 'i',
-    type: Number,
-    defaultValue: 6, // minutes
-  },
-  {
-    name: 'random',
-    alias: 'r',
-    type: Boolean,
-    defaultValue: false,
-  },
-  {
-    name: 'title',
-    alias: 't',
-    type: String,
-    defaultValue: 'Lightning Coding',
-  },
-  {
-    name: 'voice',
-    alias: 'v',
-    type: String,
-    defaultValue: null,
-  },
-  {
-    name: 'thresholds',
-    alias: 'l',
-    type: String,
-    defaultValue: null,
-  },
-]
-
-const options = commandLineArgs(optionDefinitions)
-
-let thresholds = [
-  {
-    threshold: 120,
-    text: 'Two minutes remaining',
-  },
-  {
-    threshold: 60,
-    text: '60 seconds remaining',
-  },
-  {
-    threshold: 1,
-    text: 'Your suffering is over',
-  },
-  {
-    threshold: 10,
-    text: 'ten',
-  },
-  {
-    threshold: 5,
-    text: 'five',
-  },
-  {
-    threshold: 4,
-    text: 'four',
-  },
-  {
-    threshold: 3,
-    text: 'three',
-  },
-  {
-    threshold: 2,
-    text: 'two',
-  },
-]
-
-if (options.thresholds) {
-  let data, parsed
-  try {
-    result = io.readFileSync(options.thresholds, 'UTF-8')
-    parsed = JSON.parse(result)
-  } catch (err) {
-    console.log(err)
-    process.exit(1)
-  }
-  if (!parsed.thresholds) {
-    console.log('Bad input "thresholds" file format')
-    process.exit(1)
-  }
-  thresholds = parsed.thresholds
-}
-
-/** Promisified wraper for exec */
-function _exec(cmd) {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (err, stdout) => {
-      if (err) return reject(err)
-      resolve(stdout)
-    })
-  })
-}
+const {_exec, shuffleArray, nextIndex} = require('./util')
+const options = require('./options')
+const thresholds = require('./thresholds')
 
 let voice // Chosen voice
 
@@ -139,17 +37,6 @@ const say = async (text, config) => {
   }
   params.push(text)
   spawn('say', params)
-}
-
-const nextIndex = (names, index) => (index + 1 < names.length ? index + 1 : 0)
-
-const getNext = (names, index) => names[next(names, index)]
-
-const shuffleArray = array => {
-  for (let i = array.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1))
-    ;[array[i], array[j]] = [array[j], array[i]]
-  }
 }
 
 const timesUp = interval => (...conf) => () => {

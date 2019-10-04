@@ -2,10 +2,11 @@
   "name": "lc-timer",
   "version": "1.0.0",
   "description": "Timer with notifications with randomized names",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"I don't care yet\" && exit 1"
+    "start": "node src/index.js",
+    "test": "./node_modules/mocha/bin/mocha",
+    "test:watch": "npm run test -- --watch"
   },
   "author": "",
   "license": "WTFPL",
@@ -14,5 +15,8 @@
     "colors": "^1.4.0",
     "command-line-args": "^5.1.1",
     "inquirer": "^7.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.2.1"
   }
 }
