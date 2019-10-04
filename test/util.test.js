@@ -8,7 +8,7 @@ describe('util', function() {
       assert.equal(typeof util._exec, 'function')
     })
 
-    xit('is not really testable as is', function () {
+    xit('is not really testable as is', function() {
       // TODO
     })
   })
@@ -18,7 +18,7 @@ describe('util', function() {
       assert.equal(typeof util.nextIndex, 'function')
     })
 
-    it('returns the next item in a given array', function () {
+    it('returns the next item in a given array', function() {
       const array = ['item0', 'item1', 'item2']
       const initialIndex = 0
 
@@ -31,7 +31,7 @@ describe('util', function() {
       assert.equal(result2, initialIndex + 2)
     })
 
-    it('returns 0 if the given index is the last item in the array', function () {
+    it('returns 0 if the given index is the last item in the array', function() {
       const array = ['item0', 'item1', 'item2']
       const initialIndex = array.length - 1
 
@@ -40,7 +40,7 @@ describe('util', function() {
       assert.equal(result, 0)
     })
 
-    it('returns 0 if the given index is out of bounds', function () {
+    it('returns 0 if the given index is out of bounds', function() {
       const array = ['item0', 'item1', 'item2']
       const initialIndex = array.length + 42
 
@@ -49,17 +49,17 @@ describe('util', function() {
       assert.equal(result, 0)
     })
 
-    xit('needs more tests', function () {
+    xit('needs more tests', function() {
       // TODO
     })
   })
 
-  describe('shuffleArray', function () {
+  describe('shuffleArray', function() {
     it('is a function', function() {
       assert.equal(typeof util.shuffleArray, 'function')
     })
 
-    xit('needs more tests', function () {
+    xit('needs more tests', function() {
       // TODO
     })
   })

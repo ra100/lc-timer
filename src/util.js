@@ -20,7 +20,7 @@ const shuffleArray = array => {
 }
 
 module.exports = {
-    _exec,
-    shuffleArray,
-    nextIndex
+  _exec,
+  shuffleArray,
+  nextIndex,
 }

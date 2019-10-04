@@ -82,7 +82,6 @@ const countdown = (names, index) => {
       return timesUp(interval)(names, nextIndex(names, index))()
     }
   }, 100)
-
 }
 
 const start = (names = [], index = 0) => {
@@ -94,17 +93,17 @@ const start = (names = [], index = 0) => {
         type: 'list',
         name: 'ready',
         message: 'Ready to start?',
-        choices: ['Yes','No','Skip']
+        choices: ['Yes', 'No', 'Skip'],
       },
     ])
     .then(answers => {
       const ready = answers.ready.toLowerCase()
-      if(ready === 'no') {
+      if (ready === 'no') {
         console.log('Nothing to do here.')
         say('I will remember this!!!')
         process.exit(0)
-      }else if(ready === 'skip') {
-        return start(names, index+1)
+      } else if (ready === 'skip') {
+        return start(names, index + 1)
       }
       countdown(names, index)
     })
