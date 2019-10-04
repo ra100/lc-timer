@@ -6,6 +6,7 @@ const colors = require('colors/safe')
 const {_exec, shuffleArray, nextIndex} = require('./util')
 const options = require('./options')
 const thresholds = require('./thresholds')
+const keypress = require('./keypress')
 
 let voice // Chosen voice
 
@@ -83,21 +84,11 @@ const countdown = (names, index) => {
     }
   }, 100)
 
-  const stdin = process.openStdin();
-  stdin.setRawMode(true);
-  stdin.on('keypress', keypressListener);
-
-  function keypressListener (chunk, key) {
-
-    if(key.name === 's'){
-      progressBar.stop()
-      timesUp(interval)(names, nextIndex(names, index))()
-      stdin.removeListener('keypress',keypressListener)
-    }
-
-    if (key && key.ctrl && key.name == 'c') process.exit();
-  }
-
+  keypress('s', () => {
+    progressBar.stop()
+    timesUp(interval)(names, nextIndex(names, index))()
+  })
+  
 }
 
 const start = (names = [], index = 0) => {
