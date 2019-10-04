@@ -90,17 +90,20 @@ const start = (names = [], index = 0) => {
   inquirer
     .prompt([
       {
-        type: 'confirm',
+        type: 'list',
         name: 'ready',
         message: 'Ready to start?',
-        default: true,
+        choices: ['Yes', 'No', 'Skip'],
       },
     ])
     .then(answers => {
-      if (!answers.ready) {
+      const ready = answers.ready.toLowerCase()
+      if (ready === 'no') {
         console.log('Nothing to do here.')
         say('I will remember this!!!')
         process.exit(0)
+      } else if (ready === 'skip') {
+        return start(names, index + 1)
       }
       countdown(names, index)
     })
