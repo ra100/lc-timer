@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "test": "./node_modules/mocha/bin/mocha",
+    "test": "mocha",
     "test:watch": "npm run test -- --watch"
   },
   "author": "",
